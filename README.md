@@ -4,10 +4,7 @@
 
 ## 🚀 Εγκατάσταση
 
-Η κάρτα αυτή απαιτεί δύο βασικά στοιχεία:
-
-1.  **Backend Logic (Sensor/Camera Entities):** Πρέπει να έχετε ρυθμίσει τις οντότητες `sensor.jf_daily_cartoon` και `camera.jf_daily_cartoon` (μέσω του `scrape`, `REST` ή ενός custom integration) ώστε να αντλούνται τα δεδομένα της εικόνας και του κειμένου.
-2.  **Frontend Logic (Lovelace Card):** Ο παρακάτω κώδικας YAML για την εμφάνιση των δεδομένων.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=firerm&repository=JahooFun&category=intergration)
 
 ## 🖼️ Lovelace YAML Configuration
 
