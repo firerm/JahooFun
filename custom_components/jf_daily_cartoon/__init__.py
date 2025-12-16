@@ -1,0 +1,1 @@
+"""The JF Daily Cartoon integration."""
