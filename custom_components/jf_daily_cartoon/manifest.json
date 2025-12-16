@@ -7,12 +7,21 @@
   "config_flow": true,
   "dependencies": [],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "documentation": "https://github.com/firerm/JahooFun/blob/main/README.md",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/firerm/JahooFun/issues",
   "requirements": [],
   "version": "1.0.1"
 }
+=======
+  "documentation": "https://github.com/firerm/JahooFun",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/firerm/JahooFun/issues",
+  "requirements": [],
+  "version": "1.2.1"
+}
+>>>>>>> Stashed changes
 =======
   "documentation": "https://github.com/firerm/JahooFun",
   "iot_class": "cloud_polling",
