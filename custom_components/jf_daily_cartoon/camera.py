@@ -7,7 +7,7 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(minutes=15)
+SCAN_INTERVAL = timedelta(minutes=10)
 API_BASE = "https://jahoo.gr/jf/api.php"
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -34,7 +34,10 @@ class JFCartoonCamera(Camera):
     def update(self):
         try:
             today = datetime.now().strftime('%Y-%m-%d')
-            url = f"{API_BASE}?date={today}"
+            # Add timestamp to prevent caching
+            ts = int(datetime.now().timestamp())
+            url = f"{API_BASE}?date={today}&ts={ts}"
+            
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 data = response.json()

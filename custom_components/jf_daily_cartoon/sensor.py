@@ -7,7 +7,7 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(minutes=15)
+SCAN_INTERVAL = timedelta(minutes=10)
 API_BASE = "https://jahoo.gr/jf/api.php"
 VIEWER_BASE_URL = "https://jahoo.gr/jf/?mode=viewer"
 
@@ -28,7 +28,10 @@ class JFCartoonSensor(SensorEntity):
     def update(self):
         try:
             today = datetime.now().strftime('%Y-%m-%d')
-            url = f"{API_BASE}?date={today}"
+            # Add timestamp to prevent caching
+            ts = int(datetime.now().timestamp())
+            url = f"{API_BASE}?date={today}&ts={ts}"
+            
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 data = response.json()
