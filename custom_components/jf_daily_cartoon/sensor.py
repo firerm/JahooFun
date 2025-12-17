@@ -2,13 +2,14 @@
 import logging
 import requests
 import time
+import random
 from datetime import datetime, timedelta
 from homeassistant.components.sensor import SensorEntity
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(minutes=10)
+SCAN_INTERVAL = timedelta(minutes=15) # Less frequent auto-scan, rely on manual or camera update
 API_BASE = "https://jahoo.gr/jf/api.php"
 VIEWER_BASE_URL = "https://jahoo.gr/jf/?mode=viewer"
 
@@ -19,7 +20,7 @@ class JFCartoonSensor(SensorEntity):
     def __init__(self):
         self._attr_name = "JF Daily Cartoon"
         self._attr_unique_id = "jf_daily_cartoon_sensor"
-        self._attr_native_value = "Initializing"
+        self._attr_native_value = "Ready"
         self._attr_extra_state_attributes = {}
 
     @property
@@ -29,30 +30,20 @@ class JFCartoonSensor(SensorEntity):
     def update(self):
         try:
             today = datetime.now().strftime('%Y-%m-%d')
-            # 1. Cache bust the API Call
             ts = int(time.time())
-            url = f"{API_BASE}?date={today}&api_ts={ts}"
             
+            # Simple metadata fetch
+            url = f"{API_BASE}?date={today}&ts={ts}"
             response = requests.get(url, timeout=10)
+            
             if response.status_code == 200:
                 data = response.json()
                 if data and 'title' in data:
                     self._attr_native_value = data['title']
-                    viewer_url = f"{VIEWER_BASE_URL}&date={data.get('date', '')}"
-                    images = data.get('images', [])
-                    
                     self._attr_extra_state_attributes = {
                         "description": data.get('description', ''),
-                        "images": images,
-                        "date": data.get('date', ''),
-                        "viewer_url": viewer_url,
-                        "last_updated_ts": ts
-                    }
-                else:
-                    self._attr_native_value = "No Cartoon Today"
-                    self._attr_extra_state_attributes = {
-                        "viewer_url": VIEWER_BASE_URL,
-                        "last_check": ts
+                        "viewer_url": f"{VIEWER_BASE_URL}&date={data.get('date', '')}",
+                        "last_updated": ts
                     }
         except Exception as e:
-            _LOGGER.error(f"Error updating JF Sensor: {e}")
+            _LOGGER.error(f"Sensor update failed: {e}")
