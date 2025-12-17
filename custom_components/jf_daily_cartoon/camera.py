@@ -1,6 +1,7 @@
 
 import logging
 import requests
+import time
 from datetime import datetime, timedelta
 from homeassistant.components.camera import Camera
 from .const import DOMAIN
@@ -24,6 +25,7 @@ class JFCartoonCamera(Camera):
     def camera_image(self, width=None, height=None):
         if self._image_url:
             try:
+                # The URL already contains a timestamp, forcing a fresh fetch
                 response = requests.get(self._image_url, timeout=10)
                 if response.status_code == 200:
                     return response.content
@@ -34,15 +36,22 @@ class JFCartoonCamera(Camera):
     def update(self):
         try:
             today = datetime.now().strftime('%Y-%m-%d')
-            # Add timestamp to prevent caching
-            ts = int(datetime.now().timestamp())
-            url = f"{API_BASE}?date={today}&ts={ts}"
+            # 1. Cache bust the API Call
+            ts = int(time.time())
+            url = f"{API_BASE}?date={today}&api_call_ts={ts}"
             
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 if data and 'images' in data and len(data['images']) > 0:
-                    self._image_url = data['images'][0]
+                    raw_url = data['images'][0]
+                    
+                    # 2. CRITICAL: Cache bust the IMAGE URL itself.
+                    # We append a unique timestamp to the image URL.
+                    # This forces requests.get() to see it as a new resource every 10 mins.
+                    separator = "&" if "?" in raw_url else "?"
+                    self._image_url = f"{raw_url}{separator}ha_cache_bust={ts}"
+                    
                 else:
                     self._image_url = None
         except Exception as e:

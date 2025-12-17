@@ -1,6 +1,7 @@
 
 import logging
 import requests
+import time
 from datetime import datetime, timedelta
 from homeassistant.components.sensor import SensorEntity
 from .const import DOMAIN
@@ -28,9 +29,9 @@ class JFCartoonSensor(SensorEntity):
     def update(self):
         try:
             today = datetime.now().strftime('%Y-%m-%d')
-            # Add timestamp to prevent caching
-            ts = int(datetime.now().timestamp())
-            url = f"{API_BASE}?date={today}&ts={ts}"
+            # 1. Cache bust the API Call
+            ts = int(time.time())
+            url = f"{API_BASE}?date={today}&api_ts={ts}"
             
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
@@ -39,16 +40,19 @@ class JFCartoonSensor(SensorEntity):
                     self._attr_native_value = data['title']
                     viewer_url = f"{VIEWER_BASE_URL}&date={data.get('date', '')}"
                     images = data.get('images', [])
+                    
                     self._attr_extra_state_attributes = {
                         "description": data.get('description', ''),
                         "images": images,
                         "date": data.get('date', ''),
-                        "viewer_url": viewer_url
+                        "viewer_url": viewer_url,
+                        "last_updated_ts": ts
                     }
                 else:
                     self._attr_native_value = "No Cartoon Today"
                     self._attr_extra_state_attributes = {
-                        "viewer_url": VIEWER_BASE_URL
+                        "viewer_url": VIEWER_BASE_URL,
+                        "last_check": ts
                     }
         except Exception as e:
             _LOGGER.error(f"Error updating JF Sensor: {e}")
